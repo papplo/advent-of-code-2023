@@ -66,7 +66,12 @@ func toNumeralDigits(incomingString string) []string {
 		"nine",
 	}
 
-	var result string = incomingString
+	workingCopy := make([]string, len(incomingString))
+	copy(workingCopy, strings.Split(incomingString, ""))
+
+	for charIndex, character := range workingCopy {
+		sub := make([]string, len(workingCopy)-charIndex+1)
+	}
 
 	for _, numeral := range possibleDigits {
 		findIndex := strings.Index(result, numeral)
