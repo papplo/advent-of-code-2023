@@ -32,9 +32,19 @@ func main() {
 			}
 		}
 
-		fmt.Println(mergeLineDigits[0], mergeLineDigits[1])
-
 		// todo merge and sum
+		var sumOfLine string
+
+		for _, lineDigit := range mergeLineDigits {
+			sumOfLine += strconv.Itoa(lineDigit)
+		}
+
+		sum, err := strconv.Atoi(sumOfLine)
+		if err == nil {
+			fmt.Println(sum)
+			sumOfAllValues += sum
+		}
+
 	}
 
 	// write result
