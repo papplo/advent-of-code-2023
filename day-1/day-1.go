@@ -28,33 +28,12 @@ func joinDigits(digits []int) (int, error) {
 	return result, err
 }
 
-func numeralDigit(d string) string {
-	switch d {
-	case "one":
-		return "1"
-	case "two":
-		return "2"
-	case "three":
-		return "3"
-	case "four":
-		return "4"
-	case "five":
-		return "5"
-	case "six":
-		return "6"
-	case "seven":
-		return "7"
-	case "eight":
-		return "8"
-	case "nine":
-		return "9"
-	default:
-		return "0"
-	}
-}
+func findFirstAndLastDigit(line string) ([]int, error) {
+	var firstDigit int
+	var lastDigit int
 
-func toNumeralDigits(incomingString string) []string {
 	possibleDigits := []string{
+		"zero",
 		"one",
 		"two",
 		"three",
@@ -66,43 +45,35 @@ func toNumeralDigits(incomingString string) []string {
 		"nine",
 	}
 
-	workingCopy := make([]string, len(incomingString))
-	copy(workingCopy, strings.Split(incomingString, ""))
+	for i := 0; i < len(line); i++ {
+		chars := strings.Split(line, "")
 
-	for charIndex, character := range workingCopy {
-		sub := make([]string, len(workingCopy)-charIndex+1)
-	}
-
-	for _, numeral := range possibleDigits {
-		findIndex := strings.Index(result, numeral)
-		if findIndex > -1 {
-			result = strings.Replace(result, numeral, numeralDigit(numeral), -1)
-		}
-	}
-
-	return strings.Split(result, "")
-}
-
-func findFirstAndLastDigit(line string) ([]int, error) {
-	var firstLastDigit = make([]int, 2)
-	var error error
-
-	//* adjust to take digits as litteral digits */
-	numeralCharacters := toNumeralDigits(line)
-
-	for _, lineCharacter := range numeralCharacters {
-		digit, err := strconv.Atoi(lineCharacter)
+		// check if character at index is parsable to an integer
+		char, err := strconv.Atoi(chars[i])
 		if err == nil {
-			if firstLastDigit[0] == 0 {
-				firstLastDigit[0] = digit
+			if firstDigit == 0 {
+				firstDigit = char
 			}
-			firstLastDigit[1] = digit
+			lastDigit = char
 		}
-		if err != nil {
-			error = err
+
+		// check if character indexes as first letter in numeral
+		for numeralInt, numeral := range possibleDigits {
+			findIndex := strings.Index(strings.Join(chars[i:], ""), numeral)
+			if findIndex == 0 {
+				// found a numeral value at current loop
+				if firstDigit == 0 {
+					firstDigit = numeralInt
+				}
+				lastDigit = numeralInt
+			}
 		}
 	}
-	return firstLastDigit, error
+
+	res := []int{firstDigit, lastDigit}
+
+	return res, errors.New("")
+
 }
 
 func main() {
