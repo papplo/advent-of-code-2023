@@ -43,6 +43,47 @@ func isGamePossible(gameData string) (string, bool) {
 	return strings.TrimSpace(gameId), isPossible
 }
 
+// determine the fewest number of cubes of each color
+// needed in bag to make game possible
+type CubeSet struct {
+	red   int
+	green int
+	blue  int
+}
+
+// 1 green, 11 red, 4 blue; 4 green, 1 red; 9 red, 2 blue; 5 blue, 11 red, 9 green
+func fewestAmountOfCubes(gameData string) CubeSet {
+
+	gameDataClean := strings.SplitAfter(gameData, "Game")
+	gameHands := strings.Split(gameDataClean[1], ":")[1]
+	var red, green, blue int
+
+	for _, grab := range strings.Split(gameHands, ";") {
+		for _, cubes := range strings.Split(grab, ", ") {
+			token := strings.Fields(cubes)
+			amount, err := strconv.Atoi(token[0])
+			if err == nil {
+				switch token[1] {
+				case "red":
+					if amount < red || red == 0 {
+						red = amount
+					}
+				case "green":
+					if amount < green || green == 0 {
+						green = amount
+					}
+				case "blue":
+					if amount < blue || blue == 0 {
+						blue = amount
+					}
+				}
+			}
+		}
+	}
+
+	return CubeSet{red: red, green: green, blue: blue}
+}
+
 func main() {
 	file, err := os.ReadFile("input.txt")
 	if err != nil {
@@ -55,11 +96,20 @@ func main() {
 		if isPossible {
 			id, error := strconv.Atoi(gameId)
 			sum += id
-			println(id, sum)
+			// println(id, sum)
 			if error != nil {
 				panic("whoea")
 			}
 		}
+	}
+
+	var power int
+	for _, gameData := range strings.Split(string(file), "\n") {
+
+		cubes := fewestAmountOfCubes(gameData)
+		power += cubes.blue * cubes.red * cubes.green
+		fmt.Println(cubes, power)
+
 	}
 
 	output, err := os.Create("output.txt")
@@ -69,6 +119,7 @@ func main() {
 
 	defer output.Close()
 	output.WriteString(fmt.Sprint(sum))
-	fmt.Printf("AoC: Day 2, part 1: %d", sum)
+	output.WriteString(fmt.Sprint("\n", power))
+	fmt.Printf("AoC: Day 2, part 2: %d", power)
 
 }
