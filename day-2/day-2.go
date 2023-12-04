@@ -51,29 +51,27 @@ type CubeSet struct {
 	blue  int
 }
 
-// 1 green, 11 red, 4 blue; 4 green, 1 red; 9 red, 2 blue; 5 blue, 11 red, 9 green
 func fewestAmountOfCubes(gameData string) CubeSet {
-
 	gameDataClean := strings.SplitAfter(gameData, "Game")
-	gameHands := strings.Split(gameDataClean[1], ":")[1]
+	gameRounds := strings.Split(gameDataClean[1], ":")[1]
 	var red, green, blue int
 
-	for _, grab := range strings.Split(gameHands, ";") {
-		for _, cubes := range strings.Split(grab, ", ") {
+	for _, round := range strings.Split(gameRounds, ";") {
+		for _, cubes := range strings.Split(round, ", ") {
 			token := strings.Fields(cubes)
 			amount, err := strconv.Atoi(token[0])
 			if err == nil {
 				switch token[1] {
 				case "red":
-					if amount < red || red == 0 {
+					if amount > red || red == 0 {
 						red = amount
 					}
 				case "green":
-					if amount < green || green == 0 {
+					if amount > green || green == 0 {
 						green = amount
 					}
 				case "blue":
-					if amount < blue || blue == 0 {
+					if amount > blue || blue == 0 {
 						blue = amount
 					}
 				}
@@ -105,10 +103,10 @@ func main() {
 
 	var power int
 	for _, gameData := range strings.Split(string(file), "\n") {
-
 		cubes := fewestAmountOfCubes(gameData)
-		power += cubes.blue * cubes.red * cubes.green
-		fmt.Println(cubes, power)
+		powerOfCubes := cubes.blue * cubes.red * cubes.green
+		power += powerOfCubes
+		fmt.Println(cubes, powerOfCubes, power)
 
 	}
 
