@@ -4,24 +4,65 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
-func findPartNumbers(rows [][]string) []int {
+func findPartNumbers(rows [][]string, rowNo int) []int {
 	var validPartNumbers []int
 
 	// Scan horizontally
 	for _, row := range rows {
-		var _ []int
+		var foundSequences [][]int
 
-		r, _ := regexp.Compile("([0-9]+){3}")
+		r, _ := regexp.Compile("([0-9]){3}")
+		foundSequences = r.FindAllStringIndex(strings.Join(row, ""), -1)
+		// fmt.Println(foundSequences)
 
-		fmt.Println(r.FindAllStringIndex(strings.Join(row, ""), -1))
+		for _, sequence := range foundSequences {
+
+			var hasSymbolBefore bool
+			var hasSymbolAfter bool
+			if sequence[0] == 0 {
+				hasSymbolBefore = false
+			} else {
+				hasSymbolBefore = row[sequence[0]-1] != "."
+			}
+
+			if len(row)-1 < sequence[1] {
+				hasSymbolAfter = false
+			} else {
+				hasSymbolAfter = row[sequence[1]] != "."
+			}
+
+			if hasSymbolBefore || hasSymbolAfter {
+				startIndex := row[sequence[0]:sequence[1]]
+				fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
+				validPartNumbers = append(validPartNumbers, getValueAtIndex(startIndex))
+			}
+		}
 
 	}
 
-	validPartNumbers = append(validPartNumbers, 467, 114)
 	return validPartNumbers
+}
+
+func getValueAtIndex(args []string) int {
+	var res string
+	for _, v := range args {
+		res += v
+	}
+
+	resValue, _ := strconv.Atoi(res)
+	return resValue
+}
+
+func reduce[T, M any](s []T, f func(M, T) M, initValue M) M {
+	acc := initValue
+	for _, v := range s {
+		acc = f(acc, v)
+	}
+	return acc
 }
 
 func main() {
@@ -45,18 +86,30 @@ func main() {
 		switch row {
 		case 0:
 			{
-				firstRow := engineSchematic[0:1]
-				findPartNumbers(firstRow)
+				firstRow := engineSchematic[:1]
+				sumOfPartNumbers = reduce(
+					findPartNumbers(firstRow, row),
+					func(acc, current int) int {
+						return acc + current
+					}, sumOfPartNumbers)
 			}
 		case len(lines) - 1:
 			{
-				lastRow := engineSchematic[139:140]
-				findPartNumbers(lastRow)
+				lastRow := engineSchematic[len(lines)-2:]
+				sumOfPartNumbers = reduce(
+					findPartNumbers(lastRow, row),
+					func(acc, current int) int {
+						return acc + current
+					}, sumOfPartNumbers)
 			}
 		default:
 			{
 				anyRow := engineSchematic[row-1 : row+1]
-				findPartNumbers(anyRow)
+				sumOfPartNumbers = reduce(
+					findPartNumbers(anyRow, row),
+					func(acc, current int) int {
+						return acc + current
+					}, sumOfPartNumbers)
 			}
 		}
 	}
