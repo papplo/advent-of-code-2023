@@ -8,40 +8,40 @@ import (
 	"strings"
 )
 
-func findPartNumbers(rows [][]string, rowNo int) []int {
+func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 	var validPartNumbers []int
+	// var notValidPartNumbers []int
+	var foundSequences [][]int
 
-	// Scan horizontally
-	for _, row := range rows {
-		var foundSequences [][]int
+	r, _ := regexp.Compile("([0-9]){3}")
+	foundSequences = r.FindAllStringIndex(strings.Join(row, ""), -1)
 
-		r, _ := regexp.Compile("([0-9]){3}")
-		foundSequences = r.FindAllStringIndex(strings.Join(row, ""), -1)
-		// fmt.Println(foundSequences)
+	for _, sequence := range foundSequences {
+		var hasSymbolBefore bool
+		var hasSymbolAfter bool
 
-		for _, sequence := range foundSequences {
-
-			var hasSymbolBefore bool
-			var hasSymbolAfter bool
-			if sequence[0] == 0 {
-				hasSymbolBefore = false
-			} else {
-				hasSymbolBefore = row[sequence[0]-1] != "."
-			}
-
-			if len(row)-1 < sequence[1] {
-				hasSymbolAfter = false
-			} else {
-				hasSymbolAfter = row[sequence[1]] != "."
-			}
-
-			if hasSymbolBefore || hasSymbolAfter {
-				startIndex := row[sequence[0]:sequence[1]]
-				fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
-				validPartNumbers = append(validPartNumbers, getValueAtIndex(startIndex))
-			}
+		if sequence[0] == 0 {
+			hasSymbolBefore = false
+		} else {
+			hasSymbolBefore = row[sequence[0]-1] != "."
 		}
 
+		if len(row)-1 < sequence[1] {
+			hasSymbolAfter = false
+		} else {
+			hasSymbolAfter = row[sequence[1]] != "."
+		}
+
+		if hasSymbolBefore || hasSymbolAfter {
+			startIndex := row[sequence[0]:sequence[1]]
+			fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
+			validPartNumbers = append(validPartNumbers, getValueAtIndex(startIndex))
+		} else {
+			// now check if sequence happens to have symbol in adjacent slot
+			startIndex := row[sequence[0]:sequence[1]]
+			fmt.Printf("Not Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
+
+		}
 	}
 
 	return validPartNumbers
@@ -88,7 +88,7 @@ func main() {
 			{
 				firstRow := engineSchematic[:1]
 				sumOfPartNumbers = reduce(
-					findPartNumbers(firstRow, row),
+					findPartNumbers(engineSchematic[0], row, firstRow),
 					func(acc, current int) int {
 						return acc + current
 					}, sumOfPartNumbers)
@@ -97,7 +97,7 @@ func main() {
 			{
 				lastRow := engineSchematic[len(lines)-2:]
 				sumOfPartNumbers = reduce(
-					findPartNumbers(lastRow, row),
+					findPartNumbers(engineSchematic[len(lines)-1], row, lastRow),
 					func(acc, current int) int {
 						return acc + current
 					}, sumOfPartNumbers)
@@ -106,7 +106,7 @@ func main() {
 			{
 				anyRow := engineSchematic[row-1 : row+1]
 				sumOfPartNumbers = reduce(
-					findPartNumbers(anyRow, row),
+					findPartNumbers(engineSchematic[row], row, anyRow),
 					func(acc, current int) int {
 						return acc + current
 					}, sumOfPartNumbers)
