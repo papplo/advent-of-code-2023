@@ -20,28 +20,64 @@ func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 		var hasSymbolBefore bool
 		var hasSymbolAfter bool
 
-		if sequence[0] == 0 {
-			hasSymbolBefore = false
-		} else {
+		if sequence[0] != 0 {
 			hasSymbolBefore = row[sequence[0]-1] != "."
 		}
 
-		if len(row)-1 < sequence[1] {
-			hasSymbolAfter = false
-		} else {
+		if len(row)-1 >= sequence[1] {
 			hasSymbolAfter = row[sequence[1]] != "."
 		}
 
 		if hasSymbolBefore || hasSymbolAfter {
 			startIndex := row[sequence[0]:sequence[1]]
-			fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
+			fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence)
 			validPartNumbers = append(validPartNumbers, getValueAtIndex(startIndex))
-		} else {
-			// now check if sequence happens to have symbol in adjacent slot
+		}
+
+		// now check if sequence happens to have symbol in adjacent slot
+		if !hasSymbolAfter && !hasSymbolBefore {
 			startIndex := row[sequence[0]:sequence[1]]
-			fmt.Printf("Not Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
+
+			var sliceStart, sliceEnd int
+			slots := make([][]string, 0)
+			if sequence[0] == 0 {
+				sliceStart = 0
+			} else {
+				sliceStart = sequence[0] - 1
+			}
+
+			if sequence[1] >= len(row)-1 {
+				sliceEnd = len(row) - 1
+			} else {
+				sliceEnd = sequence[1]
+			}
+
+			switch rowNo {
+			case 0:
+				slots = append(slots, adjacentRows[1][sliceStart:sliceEnd])
+			case 139:
+				slots = append(slots, adjacentRows[0][sliceStart:sliceEnd])
+			default:
+				slots = append(slots,
+					adjacentRows[0][sliceStart:sliceEnd],
+					adjacentRows[2][sliceStart:sliceEnd],
+				)
+
+			}
+
+			for _, slot := range slots {
+				println(strings.Join(slot, ""))
+				foundSymbol := strings.ContainsAny(strings.Join(slot, ""), "@-*=-%&/")
+				if foundSymbol {
+					fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
+					validPartNumbers = append(validPartNumbers, getValueAtIndex(startIndex))
+				} else {
+					fmt.Printf("Not Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
+				}
+			}
 
 		}
+
 	}
 
 	return validPartNumbers
@@ -82,31 +118,33 @@ func main() {
 
 	for row, line := range lines {
 		engineSchematic[row] = strings.Split(line, "")
+	}
 
-		switch row {
+	for rowNo, row := range engineSchematic {
+		switch rowNo {
 		case 0:
 			{
-				firstRow := engineSchematic[:1]
+				adjacentRows := engineSchematic[0:2]
 				sumOfPartNumbers = reduce(
-					findPartNumbers(engineSchematic[0], row, firstRow),
+					findPartNumbers(row, 0, adjacentRows),
 					func(acc, current int) int {
 						return acc + current
 					}, sumOfPartNumbers)
 			}
-		case len(lines) - 1:
+		case len(engineSchematic) - 1:
 			{
-				lastRow := engineSchematic[len(lines)-2:]
+				adjacentRows := engineSchematic[len(engineSchematic)-2:]
 				sumOfPartNumbers = reduce(
-					findPartNumbers(engineSchematic[len(lines)-1], row, lastRow),
+					findPartNumbers(row, rowNo, adjacentRows),
 					func(acc, current int) int {
 						return acc + current
 					}, sumOfPartNumbers)
 			}
 		default:
 			{
-				anyRow := engineSchematic[row-1 : row+1]
+				adjacentRows := engineSchematic[rowNo-1 : rowNo+1]
 				sumOfPartNumbers = reduce(
-					findPartNumbers(engineSchematic[row], row, anyRow),
+					findPartNumbers(row, rowNo, adjacentRows),
 					func(acc, current int) int {
 						return acc + current
 					}, sumOfPartNumbers)
