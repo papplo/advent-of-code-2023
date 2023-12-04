@@ -19,5 +19,5 @@ Luckily, I solved the problem with an iteration of the full slice, while steppin
 However im starting to get a feel of the slice data structure, the libraries that are available to parse integers and split strings. Nice problems overall.
 - pt 2. ———> i did'nt quite catch the spec of "least amount of cubes" so calculated for the lowest instead of highest amount of cubes in the bag, per color.
 
-## Day 3:
+## Day 3: Gear Ratios
 - pt 1.
