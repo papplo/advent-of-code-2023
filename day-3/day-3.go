@@ -13,7 +13,7 @@ func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 	// var notValidPartNumbers []int
 	var foundSequences [][]int
 
-	r, _ := regexp.Compile("([0-9]){3}")
+	r, _ := regexp.Compile("([0-9]){2,3}")
 	foundSequences = r.FindAllStringIndex(strings.Join(row, ""), -1)
 
 	for _, sequence := range foundSequences {
@@ -32,6 +32,7 @@ func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 			startIndex := row[sequence[0]:sequence[1]]
 			fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence)
 			validPartNumbers = append(validPartNumbers, getValueAtIndex(startIndex))
+			break
 		}
 
 		// now check if sequence happens to have symbol in adjacent slot
@@ -47,33 +48,33 @@ func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 			}
 
 			if sequence[1] >= len(row)-1 {
-				sliceEnd = len(row) - 1
+				sliceEnd = len(row)
 			} else {
-				sliceEnd = sequence[1]
+				sliceEnd = sequence[1] + 1
 			}
 
 			switch rowNo {
 			case 0:
 				slots = append(slots, adjacentRows[1][sliceStart:sliceEnd])
-			case 139:
+			case len(row) - 1:
 				slots = append(slots, adjacentRows[0][sliceStart:sliceEnd])
 			default:
 				slots = append(slots,
 					adjacentRows[0][sliceStart:sliceEnd],
 					adjacentRows[2][sliceStart:sliceEnd],
 				)
-
 			}
 
 			for _, slot := range slots {
 				println(strings.Join(slot, ""))
-				foundSymbol := strings.ContainsAny(strings.Join(slot, ""), "@-*=-%&/")
+				foundSymbol := strings.ContainsAny(strings.Join(slot, ""), "#@-*=+-%&$/")
 				if foundSymbol {
 					fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
 					validPartNumbers = append(validPartNumbers, getValueAtIndex(startIndex))
-				} else {
-					fmt.Printf("Not Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
 				}
+				// else {
+				// 	fmt.Printf("Not Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
+				// }
 			}
 
 		}
@@ -102,7 +103,7 @@ func reduce[T, M any](s []T, f func(M, T) M, initValue M) M {
 }
 
 func main() {
-	file, err := os.ReadFile("input.txt")
+	file, err := os.ReadFile("input_test.txt")
 	if err != nil {
 		return
 	}
@@ -142,7 +143,7 @@ func main() {
 			}
 		default:
 			{
-				adjacentRows := engineSchematic[rowNo-1 : rowNo+1]
+				adjacentRows := engineSchematic[rowNo-1 : rowNo+2]
 				sumOfPartNumbers = reduce(
 					findPartNumbers(row, rowNo, adjacentRows),
 					func(acc, current int) int {
