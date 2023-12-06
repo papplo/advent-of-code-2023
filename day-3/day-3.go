@@ -6,14 +6,17 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 	var validPartNumbers []int
-	// var notValidPartNumbers []int
 	var foundSequences [][]int
 
-	r, _ := regexp.Compile("([0-9]){2,3}")
+	var innerSum int
+
+	r, _ := regexp.Compile("([0-9]){1,3}")
 	foundSequences = r.FindAllStringIndex(strings.Join(row, ""), -1)
 
 	for _, sequence := range foundSequences {
@@ -28,11 +31,21 @@ func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 			hasSymbolAfter = row[sequence[1]] != "."
 		}
 
-		if hasSymbolBefore || hasSymbolAfter {
+		if hasSymbolBefore {
 			startIndex := row[sequence[0]:sequence[1]]
 			fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence)
-			validPartNumbers = append(validPartNumbers, getValueAtIndex(startIndex))
-			break
+			innerSum = +getValueAtIndex(startIndex)
+		}
+
+		if hasSymbolAfter {
+			startIndex := row[sequence[0]:sequence[1]]
+			fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence)
+			innerSum = +getValueAtIndex(startIndex)
+		}
+
+		if innerSum > 0 {
+			validPartNumbers = append(validPartNumbers, innerSum)
+			innerSum = 0
 		}
 
 		// now check if sequence happens to have symbol in adjacent slot
@@ -66,9 +79,9 @@ func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 			}
 
 			for _, slot := range slots {
-				println(strings.Join(slot, ""))
 				foundSymbol := strings.ContainsAny(strings.Join(slot, ""), "#@-*=+-%&$/")
 				if foundSymbol {
+					println("            ", strings.Join(slot, ""))
 					fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
 					validPartNumbers = append(validPartNumbers, getValueAtIndex(startIndex))
 				}
@@ -76,7 +89,6 @@ func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 				// 	fmt.Printf("Not Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence[0])
 				// }
 			}
-
 		}
 
 	}
@@ -98,30 +110,35 @@ func reduce[T, M any](s []T, f func(M, T) M, initValue M) M {
 	acc := initValue
 	for _, v := range s {
 		acc = f(acc, v)
+		fmt.Printf("%v + %v = %v\n", initValue, v, acc)
 	}
 	return acc
 }
 
 func main() {
-	file, err := os.ReadFile("input_test.txt")
+	file, err := os.ReadFile("input.txt")
 	if err != nil {
 		return
 	}
 
+	// Create a new color object
+	cyan := color.New(color.FgCyan).Add(color.Underline).PrintlnFunc()
+
 	/* -- Day 3 -- pt.1 */
 	var sumOfPartNumbers int
 
-	/* create matrix data structure */
-	type LinesOfText [][]string
-
 	lines := strings.Split(string(file), "\n")
-	engineSchematic := make(LinesOfText, len(lines[0]))
+	type schema [][]string
+	parsedFile := make(schema, len(lines))
 
 	for row, line := range lines {
-		engineSchematic[row] = strings.Split(line, "")
+		parsedFile[row] = strings.Split(line, "")
 	}
 
+	engineSchematic := parsedFile
+
 	for rowNo, row := range engineSchematic {
+		cyan(strings.Join(row, ""))
 		switch rowNo {
 		case 0:
 			{
@@ -160,6 +177,6 @@ func main() {
 
 	defer output.Close()
 	output.WriteString(fmt.Sprint(sumOfPartNumbers))
-	fmt.Printf("AoC: Day 3, part 1: %d", sumOfPartNumbers)
+	fmt.Printf("AoC: Day 3, part 1: %d\n", sumOfPartNumbers)
 
 }
