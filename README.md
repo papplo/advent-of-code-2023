@@ -20,4 +20,6 @@ However im starting to get a feel of the slice data structure, the libraries tha
 - pt 2. ———> i did'nt quite catch the spec of "least amount of cubes" so calculated for the lowest instead of highest amount of cubes in the bag, per color.
 
 ## Day 3: Gear Ratios
-- pt 1.
+- pt 1. This was quite hard, but finding the patterns for partnumbers taking into consideration edge cases such as first/last index on slices was tricky and quite error prone. The real bug hunt was solving a regex that listed a sequence of {1,3} `one, two or three`digits, unknowingly i only searched for 2/3 long sequences. Finally i gave up and started prowling the input file line by line, until i spotted a single digit which gave up the solution.
+
+-pt 2.
