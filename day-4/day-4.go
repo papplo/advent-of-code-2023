@@ -22,43 +22,46 @@ func aocOutput(r int) {
 	output.WriteString(fmt.Sprint(r))
 }
 
-func main() {
-
-	input := aocInput()
-	// each card (line) has a: []nums | b: []nums
-	// where for each b in a, you get
-	// 1 point for first, double the amount for ...n
-
+func scratchCards(line string) (int, int) {
 	r, _ := regexp.Compile("([0-9]){1,3}")
-	var totalPoints int
+	nums := r.FindAllString(line, -1)
 
-	for i := 0; i < len(input); i++ {
-		nums := r.FindAllString(input[i], -1)
+	var scratchedCards int
+	var matchesInGame int
+	gameNumber := nums[0:1]
+	winningNumbers := nums[1:11]
+	myNumbers := nums[11:]
 
-		// stuff we know about a line
-		var matchesInGame int
-		gameNumber := nums[0:1]
-		winningNumbers := nums[1:11]
-		myNumbers := nums[11:]
-
-		for _, w := range winningNumbers {
-			for _, m := range myNumbers {
-				if m == w {
-					// fmt.Printf("Win: %v, Scratched: %v\n\n", w, m)
-					matchesInGame += 1
-				}
+	for _, w := range winningNumbers {
+		for _, m := range myNumbers {
+			if m == w {
+				matchesInGame += 1
 			}
 		}
+	}
 
-		gamePoints := min(matchesInGame, 1)
-		for j := 1; j < matchesInGame; j++ {
-			gamePoints = gamePoints * 2
-		}
+	gamePoints := min(matchesInGame, 1)
+	for j := 1; j < matchesInGame; j++ {
+		gamePoints = gamePoints * 2
+	}
+	if gamePoints > 0 {
+		fmt.Printf("Matches in game %v: %v, POINTS: %v\n", gameNumber, matchesInGame, gamePoints)
+	}
+	return gamePoints, scratchedCards
+}
 
-		if gamePoints > 0 {
-			fmt.Printf("Matches in game %v: %v, POINTS: %v\n", gameNumber, matchesInGame, gamePoints)
-		}
+func main() {
+	input := aocInput()
+
+	var totalPoints int
+	var totalCards int
+
+	for i := 0; i < len(input); i++ {
+		gamePoints, scratchedCards := scratchCards(input[i])
+
+		totalCards += scratchedCards
 		totalPoints += gamePoints
 	}
-	aocOutput(totalPoints)
+
+	aocOutput(totalCards)
 }
