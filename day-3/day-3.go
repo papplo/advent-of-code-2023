@@ -10,10 +10,16 @@ import (
 	"github.com/fatih/color"
 )
 
+type Gear struct {
+	row       int
+	index     int
+	sequences []int
+}
+
 func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 	var validPartNumbers []int
 	var foundSequences [][]int
-
+	var foundGearSymbol []Gear
 	var innerSum int
 
 	r, _ := regexp.Compile("([0-9]){1,3}")
@@ -22,18 +28,30 @@ func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 	for _, sequence := range foundSequences {
 		var hasSymbolBefore bool
 		var hasSymbolAfter bool
+		var hasGear Gear
 
 		if sequence[0] != 0 {
-			hasSymbolBefore = row[sequence[0]-1] != "."
+			leftCell := row[sequence[0]-1]
+			hasSymbolBefore = leftCell != "."
+			if leftCell == "*" {
+				hasGear = Gear{row: rowNo, index: sequence[0] - 1}
+				foundGearSymbol = append(foundGearSymbol, hasGear)
+			}
 		}
 
 		if len(row)-1 >= sequence[1] {
-			hasSymbolAfter = row[sequence[1]] != "."
+			rightCell := row[sequence[1]]
+			hasSymbolAfter = rightCell != "."
+			if rightCell == "*" {
+				hasGear = Gear{row: rowNo, index: sequence[1]}
+				foundGearSymbol = append(foundGearSymbol, hasGear)
+			}
 		}
 
 		if hasSymbolBefore {
 			startIndex := row[sequence[0]:sequence[1]]
 			fmt.Printf("Valid PartNo: %v at row %d, starting at idx: %d\n", getValueAtIndex(startIndex), rowNo, sequence)
+
 			innerSum = +getValueAtIndex(startIndex)
 		}
 
@@ -93,6 +111,7 @@ func findPartNumbers(row []string, rowNo int, adjacentRows [][]string) []int {
 
 	}
 
+	fmt.Printf("\n\n Gears: %v\n\n\n", foundGearSymbol)
 	return validPartNumbers
 }
 
@@ -115,7 +134,7 @@ func reduce[T, M any](s []T, f func(M, T) M, initValue M) M {
 	return acc
 }
 
-func main() {
+func mains() {
 	file, err := os.ReadFile("input.txt")
 	if err != nil {
 		return
