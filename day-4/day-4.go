@@ -22,13 +22,12 @@ func aocOutput(r int) {
 	output.WriteString(fmt.Sprint(r))
 }
 
-func scratchCards(line string) (int, int) {
+func scratchCards(lines []string, index int) (int, int) {
 	r, _ := regexp.Compile("([0-9]){1,3}")
-	nums := r.FindAllString(line, -1)
+	nums := r.FindAllString(lines[index], -1)
 
-	var scratchedCards int
 	var matchesInGame int
-	gameNumber := nums[0:1]
+	// gameNumber := nums[0:1]
 	winningNumbers := nums[1:11]
 	myNumbers := nums[11:]
 
@@ -40,13 +39,19 @@ func scratchCards(line string) (int, int) {
 		}
 	}
 
+	scratchedCards := 1
+
 	gamePoints := min(matchesInGame, 1)
 	for j := 1; j < matchesInGame; j++ {
 		gamePoints = gamePoints * 2
+		_, recursiveScrathes := scratchCards(lines, j)
+
+		scratchedCards = +recursiveScrathes
 	}
-	if gamePoints > 0 {
-		fmt.Printf("Matches in game %v: %v, POINTS: %v\n", gameNumber, matchesInGame, gamePoints)
-	}
+
+	// if gamePoints > 0 {
+	// 	fmt.Printf("Matches in game %v: %v, POINTS: %v\n", gameNumber, matchesInGame, gamePoints)
+	// }
 	return gamePoints, scratchedCards
 }
 
@@ -57,7 +62,7 @@ func main() {
 	var totalCards int
 
 	for i := 0; i < len(input); i++ {
-		gamePoints, scratchedCards := scratchCards(input[i])
+		gamePoints, scratchedCards := scratchCards(input, i)
 
 		totalCards += scratchedCards
 		totalPoints += gamePoints
