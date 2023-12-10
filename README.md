@@ -22,4 +22,10 @@ However im starting to get a feel of the slice data structure, the libraries tha
 ## Day 3: Gear Ratios
 - pt 1. This was quite hard, but finding the patterns for partnumbers taking into consideration edge cases such as first/last index on slices was tricky and quite error prone. The real bug hunt was solving a regex that listed a sequence of {1,3} `one, two or three`digits, unknowingly i only searched for 2/3 long sequences. Finally i gave up and started prowling the input file line by line, until i spotted a single digit which gave up the solution.
 
--pt 2.
+-pt 2...
+
+## Day 4: Generally simpler solving of puzzles
+- pt 1: easy breazy
+- pt 2: took me a good while to reduce the amount of matches and copies onto next iterations of cards
+
+
