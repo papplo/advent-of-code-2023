@@ -45,8 +45,8 @@ func scratchCards(lines *[]string, index int) Round {
 
 	gameNumber, _ := strconv.Atoi(nums[0:1][0])
 	round := Round{game: gameNumber - 1, copies: 1}
-	winningNumbers := nums[1:6]
-	myNumbers := nums[6:]
+	winningNumbers := nums[1:11]
+	myNumbers := nums[11:]
 
 	for _, w := range winningNumbers {
 		for _, m := range myNumbers {
